@@ -108,7 +108,7 @@ Obs: o comando acima é para arquivo de coverage.
 
 ## Contribuindo
 
-Contribuições são bem-vindas! Se você deseja adicionar novos filmes, séries, ou fazer melhorias, basta criar um Pull Request e daremos uma olhada o quanto antes.
+Contribuições são bem-vindas! Se você deseja adicionar melhorias, novos endpoints, basta criar um Pull Request e daremos uma olhada o quanto antes.
 
 ## Licença
 Licenciado sob a Open Software License v3.0.
