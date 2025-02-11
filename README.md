@@ -25,7 +25,7 @@ Ela **NÃO** interage diretamente com plataformas de streaming, apenas oferece d
 
 | Endpoint | Descrição | Exemplo de Uso (bash) |
 |----------|-----------|-----------------------|
-| `/series/found` | Retorna as séries salvas. | `curl <baseUrl>/api/series/found` |
+| `/series/found` | Retorna as séries salvas. | `curl <baseUrl>/series/found` |
 | `/series/search/{title}` | Pesquisa séries por título específico. | `curl <baseUrl>/series/search/Breaking Bad` |
 | `/series/search/{genre}` | Pesquisa séries por genero. | `curl <baseUrl>/series/search/comédia` |
 
@@ -34,9 +34,18 @@ Ela **NÃO** interage diretamente com plataformas de streaming, apenas oferece d
 | Endpoint | Descrição | Exemplo de Uso (bash) |
 |----------|-----------|-----------------------|
 | `/channels/found` | Retorna os canais salvos. | `curl <baseUrl>/channels` |
-| `/channels/search/{ciid}` | Pesquisa canal por ID. | `curl <baseUrl>/channels/{28shudhwue982jijwz}` |
+| `/channels/search/{channel_id}` | Pesquisa canal por ID. | `curl <baseUrl>/channels/{28shudhwue982jijwz}` |
 | `/channels/search/{genre}` | Pesquisa canais por categoria específica. | `curl <baseUrl>/channels/search/abertos` |
 
+
+## Swagger
+
+- O projeto contém um Swagger que fica em **`<baseUrl>`/docs** para melhor ultilização dos endpoints e para ajudar os novos usuários da API.
+
+## Funcionalidades Planejadas
+
+- Relacionamento entre entidades (por exemplo, recomendações de filmes/séries semelhantes)
+- Interface Web para facilitar a adição de novos dados
 
 ## Funcionalidades Planejadas
 
@@ -46,37 +55,56 @@ Ela **NÃO** interage diretamente com plataformas de streaming, apenas oferece d
 ## Pré-requisitos
 
 - Python: ^3.8
-- Pip
+- Poetry
 
 ## Instalação
 
-Instale as dependências utilizando pip:
+Instale as dependências utilizando Poetry:
 
 ```bash
-pip install -r requirements.txt
+poetry install
 ```
-
-Caso queira alterar a porta padrão, renomeie o arquivo .env.example para .env e modifique o campo `API_PORT` para a porta desejada.
 
 Dependendo do ambiente (produção ou desenvolvimento), o processo de inicialização varia.
 
-## Produção
+## Produção e Desenvolvimento
 
+Nesse projeto foi usado um lynt para otimizar os comandos de run.
 Para rodar a API em produção, use o seguinte comando para iniciar o servidor:
 
 ```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-## Desenvolvimento
-
-Para iniciar o ambiente de desenvolvimento, utilize o comando:
-
-```bash
-python -m uvicorn app.main:app --reload
+task run
 ```
 
 Este comando iniciará o servidor com recarregamento automático sempre que alterações forem feitas no código.
+
+O Projeto inclui mais alguns comandos para melhorar a experiência de desenvolvimento para futuras contribuições que são:
+
+<h4> Pré Formatação </h4>
+
+```bash
+task pre_format
+```
+
+<h4> Formatação </h4>
+
+```bash
+task format
+```
+
+<h4> Execução de testes </h4>
+
+```bash
+task test
+```
+
+<h4> Pré Formatação </h4>
+
+```bash
+task post_test
+```
+
+Obs: o comando acima é para arquivo de coverage.
 
 ## Contribuindo
 
