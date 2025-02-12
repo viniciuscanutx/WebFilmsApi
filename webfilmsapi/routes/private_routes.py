@@ -16,7 +16,7 @@ SECRET_PASSWORD = os.getenv("SECRET_KEY")
 security = HTTPBearer()
 
 def verify_password(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials  # Pegando o token
+    token = credentials.credentials  
     if token != SECRET_PASSWORD:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
