@@ -10,8 +10,8 @@ class Movies(BaseModel):
     releaseDate: str
     parentalRating: str
     genre: List[str]
-    rating: str
-    rattingrt: Optional[float] = None
+    rating: float
+    ratingrt: float
     poster: str
     banner: str
     link: str
@@ -38,7 +38,7 @@ class Series(BaseModel):
     parentalRating: str
     genre: List[str]
     rating: float
-    rattingrt: Optional[float] = None
+    ratingrt: float
     poster: str
     banner: str
 
@@ -48,3 +48,7 @@ class Channels(BaseModel):
     category: str
     link: str
     logo: str
+    
+class SuccessMessageWithTitle(BaseModel):
+    message: str
+    imdbid: str

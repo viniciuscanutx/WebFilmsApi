@@ -2,7 +2,6 @@ from typing import List, Dict
 
 def serializeFilm(item) -> dict:
     return {
-        "id": str(item["_id"]),
         "imdbid": item["imdbid"],
         "title": item["title"],
         "overview": item["overview"],
@@ -11,17 +10,32 @@ def serializeFilm(item) -> dict:
         "releaseDate": item["releaseDate"],
         "parentalRating": item["parentalRating"],
         "genre": item["genre"],
-        "rating": item["rating"],
-        "rattingrt": item["rattingrt"],
+        "rating": float(item["rating"]),  # Convertido para float
+        "ratingrt": float(item["ratingrt"]),  # Convertido para float
         "poster": item["poster"],
         "banner": item["banner"],
         "link": item["link"],
         "subtitles": item["subtitles"]
     }
+    
+def serializeFilmDto(item) -> dict:
+    return {
+        "imdbid": item["imdbid"],
+        "title": item["title"],
+        "overview": item["overview"],
+        "runtime": item["runtime"],
+        "releaseYear": item["releaseYear"],
+        "releaseDate": item["releaseDate"],
+        "parentalRating": item["parentalRating"],
+        "genre": item["genre"],
+        "rating": float(item["rating"]),  # Convertido para float
+        "ratingrt": float(item["ratingrt"]),  # Convertido para float
+        "poster": item["poster"],
+        "banner": item["banner"],
+    }
 
 def serializeSeries(item) -> dict:
     return {
-        "id": str(item["_id"]),
         "imdbid": item["imdbid"],
         "title": item["title"],
         "overview": item["overview"],
@@ -37,14 +51,13 @@ def serializeSeries(item) -> dict:
         "parentalRating": item["parentalRating"],
         "genre": item.get("genre", []),
         "rating": item["rating"],
-        "rattingrt": item["rattingrt"],
+        "ratingrt": item["ratingrt"],
         "poster": item["poster"],
         "banner": item["banner"]
     }
     
 def serializeSeriesDto(item) -> dict:
     return {
-        "id": str(item["_id"]),
         "imdbid": item["imdbid"],
         "title": item["title"],
         "overview": item["overview"],
@@ -55,7 +68,7 @@ def serializeSeriesDto(item) -> dict:
         "parentalRating": item["parentalRating"],
         "genre": item.get("genre", []),
         "rating": item["rating"],
-        "rattingrt": item["rattingrt"],
+        "ratingrt": item["ratingrt"],
         "poster": item["poster"],
         "banner": item["banner"]
     }
@@ -63,7 +76,6 @@ def serializeSeriesDto(item) -> dict:
 
 def serializeChannel(item) -> dict:
     return {
-        "id": str(item["_id"]),
         "title": item["title"],
         "category": item["category"],
         "link": item["link"],

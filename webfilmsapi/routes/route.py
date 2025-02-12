@@ -1,10 +1,10 @@
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query, Depends, status
 from typing import List
-from ..models.model import Movies, Series, Channels, Episode
+from ..models.model import Movies, Series, Channels, Episode, SuccessMessageWithTitle
 from ..dto.modelDto import MovieDto, SeriesDto, ChannelsDto
 from ..config.db import db, dbs, dbc
-from ..schemas.schema import serializeFilm, serializeSeries, serializeSeriesDto, serializeChannel
+from ..schemas.schema import serializeFilm, serializeFilmDto, serializeSeries, serializeSeriesDto, serializeChannel
 from dotenv import load_dotenv
 import os
 
@@ -39,7 +39,7 @@ def welcome():
 @user.get("/movies/found", tags=["Movies"], summary="Exibir Todos Os Filmes", response_model=List[MovieDto])
 def list_films():
     movies = db.movies.find()
-    return [serializeFilm(movie) for movie in movies]
+    return [serializeFilmDto(movie) for movie in movies]
 
 @user.get("/movies/imdb/{imdbid}", tags=["Movies"], summary="Buscar Filme pelo ID do IMDb", response_model=MovieDto)
 async def get_movie_by_imdbid(imdbid: str):
@@ -60,12 +60,14 @@ async def search_movies_by_genre(genre: str = Query(..., description="Gênero do
     movies = db.movies.find(query)
     return [serializeFilm(movie) for movie in movies]
 
-@user.post("/movies/add", tags=["Movies"], summary="Adicionar Filme", response_model=Movies)
+@user.post("/movies/add", tags=["Movies"], summary="Adicionar Filme", response_model=SuccessMessageWithTitle)
 def add_film(film: Movies, password: str = Depends(verify_password)):
-    result = db.movies.insert_one(film.model_dump())
+    film_dict = film.model_dump()
+    result = db.movies.insert_one(film_dict)
     if not result.inserted_id:
         raise HTTPException(status_code=400, detail="Erro ao adicionar filme")
-    return {"title": str(result.inserted_id)}
+    
+    return {'message': 'Filme adicionado com sucesso!', 'imdbid': film.imdbid}
 
 @user.get("/series/found", tags=["Series"], summary="Exibir Todas As Series", response_model=List[SeriesDto])
 async def list_series():
@@ -144,7 +146,7 @@ def add_channel(channel: Channels, password: str = Depends(verify_password)):
         raise HTTPException(status_code=400, detail="Erro ao adicionar canal")
     return {"title": str(result.inserted_id)}
 
-@user.put("/movies/{movie_id}", tags=["Movies"], summary="Atualizar Filme", response_model=Movies)
+@user.put("/movies/{movie_id}", tags=["Movies"], summary="Atualizar Filme", response_model=SuccessMessageWithTitle)
 async def update_film(movie_id: str, film: Movies, password: str = Depends(verify_password)):
     result = db.movies.update_one(
         {"_id": ObjectId(movie_id)},
@@ -152,8 +154,8 @@ async def update_film(movie_id: str, film: Movies, password: str = Depends(verif
     )
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Filme não encontrado")
-    updated_film = db.movies.find_one({"_id": ObjectId(movie_id)})
-    return serializeFilm(updated_film)
+    
+    return {'message': 'Filme atualizado com sucesso!', 'imdbid': film.imdbid}
 
 @user.delete("/movies/{movie_id}", tags=["Movies"], summary="Deletar Filme")
 async def delete_film(movie_id: str, password: str = Depends(verify_password)):

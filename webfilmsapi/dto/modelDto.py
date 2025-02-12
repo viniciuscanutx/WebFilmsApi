@@ -10,13 +10,10 @@ class MovieDto(BaseModel):
     releaseDate: str
     parentalRating: str
     genre: List[str]
-    rating: Optional[float]
-    rattingrt: Optional[float] = None
+    rating: float
+    ratingrt: float
     poster: str
     banner: str
-
-class MovieListResponse(BaseModel):
-    movies: List[MovieDto]
 
 class Episode(BaseModel):
     epnumber: str
@@ -38,8 +35,8 @@ class SeriesDto(BaseModel):
     status: str
     parentalRating: str
     genre: List[str]
-    rating: Optional[float]
-    rattingrt: Optional[float] = None
+    rating: float
+    ratingrt: float
     poster: str
     banner: str
 
