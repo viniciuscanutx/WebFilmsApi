@@ -1,10 +1,26 @@
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query, Depends, status
 from typing import List
-from ..models.model import Movies, Series, Channels, Episode, SuccessMessageWithTitle
-from ..dto.modelDto import MovieDto, SeriesDto, ChannelsDto
-from ..config.db import db, dbs, dbc
-from ..schemas.schema import serializeFilm, serializeFilmDto, serializeSeries, serializeSeriesDto, serializeChannel
+from ..models.model import ( 
+        Movies, 
+        Series, 
+        Channels,
+        Episode, 
+        MovieDto, 
+        SeriesDto, 
+        ChannelsDto,
+        SuccessMessageTitle,
+        SuccessMessageID)
+from ..config.db import ( 
+        db,
+        dbs,
+        dbc )
+from ..schemas.schema import (
+        serializeFilm,
+        serializeFilmDto, 
+        serializeSeries, 
+        serializeSeriesDto, 
+        serializeChannel )
 from dotenv import load_dotenv
 import os
 
@@ -41,6 +57,7 @@ def list_films():
     movies = db.movies.find()
     return [serializeFilmDto(movie) for movie in movies]
 
+
 @user.get("/movies/imdb/{imdbid}", tags=["Movies"], summary="Buscar Filme pelo ID do IMDb", response_model=MovieDto)
 async def get_movie_by_imdbid(imdbid: str):
     movie = db.movies.find_one({"imdbid": imdbid})
@@ -48,11 +65,13 @@ async def get_movie_by_imdbid(imdbid: str):
         raise HTTPException(status_code=404, detail="Filme não encontrado")
     return serializeFilm(movie)
 
+
 @user.get("/movies/search/title", tags=["Movies"], summary="Buscar Filmes por Título", response_model=List[MovieDto])
 async def search_movies_by_title(title: str = Query(..., description="Título do filme")):
     query = {"title": {"$regex": title, "$options": "i"}}
     movies = db.movies.find(query)
     return [serializeFilm(movie) for movie in movies]
+
 
 @user.get("/movies/search/genre", tags=["Movies"], summary="Buscar Filmes por Gênero", response_model=List[MovieDto])
 async def search_movies_by_genre(genre: str = Query(..., description="Gênero do filme")):
@@ -60,7 +79,8 @@ async def search_movies_by_genre(genre: str = Query(..., description="Gênero do
     movies = db.movies.find(query)
     return [serializeFilm(movie) for movie in movies]
 
-@user.post("/movies/add", tags=["Movies"], summary="Adicionar Filme", response_model=SuccessMessageWithTitle)
+
+@user.post("/movies/add", tags=["Movies"], summary="Adicionar Filme", response_model=SuccessMessageID)
 def add_film(film: Movies, password: str = Depends(verify_password)):
     film_dict = film.model_dump()
     result = db.movies.insert_one(film_dict)
@@ -68,6 +88,27 @@ def add_film(film: Movies, password: str = Depends(verify_password)):
         raise HTTPException(status_code=400, detail="Erro ao adicionar filme")
     
     return {'message': 'Filme adicionado com sucesso!', 'imdbid': film.imdbid}
+
+
+@user.put("/movies/{movie_id}", tags=["Movies"], summary="Atualizar Filme", response_model=SuccessMessageID)
+async def update_film(movie_id: str, film: Movies, password: str = Depends(verify_password)):
+    result = db.movies.update_one(
+        {"_id": ObjectId(movie_id)},
+        {"$set": film.model_dump()}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Filme não encontrado")
+    
+    return {'message': 'Filme atualizado com sucesso!', 'imdbid': film.imdbid}
+
+
+@user.delete("/movies/{movie_id}", tags=["Movies"], summary="Deletar Filme")
+async def delete_film(movie_id: str, password: str = Depends(verify_password)):
+    result = db.movies.delete_one({"_id": ObjectId(movie_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Filme não encontrado")
+    return {"message": "Filme removido com sucesso"}
+
 
 @user.get("/series/found", tags=["Series"], summary="Exibir Todas As Series", response_model=List[SeriesDto])
 async def list_series():
@@ -93,7 +134,7 @@ async def get_series_by_imdbid(imdbid: str):
         raise HTTPException(status_code=404, detail="Série não encontrada")
     return serializeSeriesDto(series)
 
-@user.post("/series/add", tags=["Series"], summary="Adicionar Serie", response_model=Series)
+@user.post("/series/add", tags=["Series"], summary="Adicionar Serie", response_model=SuccessMessageID)
 async def add_series(series: Series, password: str = Depends(verify_password)):
     series_data = series.model_dump()
     
@@ -109,60 +150,8 @@ async def add_series(series: Series, password: str = Depends(verify_password)):
     if not result.inserted_id:
         raise HTTPException(status_code=400, detail="Erro ao adicionar série")
     
-    created_series = dbs.series.find_one({"_id": result.inserted_id})
-    return serializeSeries(created_series)
+    return {'message': 'Série adicionada com sucesso!', 'imdbid': series.imdbid}
 
-@user.get("/channels/found", tags=["Channels"], summary="Exibir Todos os Canais", response_model=List[ChannelsDto])
-def list_channels():
-    channels = dbc.channels.find()
-    return [serializeChannel(channel) for channel in channels]
-
-@user.get("/channels/search/title", tags=["Channels"], summary="Buscar Canais por Título", response_model=List[ChannelsDto])
-async def search_channels_by_title(title: str = Query(..., description="Título do canal")):
-    query = {"title": {"$regex": title, "$options": "i"}}
-    channels = dbc.channels.find(query)
-    return [serializeChannel(channel) for channel in channels]
-
-@user.get("/channels/search/genre", tags=["Channels"], summary="Buscar Canais por Categoria", response_model=List[ChannelsDto])
-async def search_channels_by_genre(genre: str = Query(..., description="Categoria do canal")):
-    query = {"genre": {"$regex": genre, "$options": "i"}}
-    channels = dbc.channels.find(query)
-    return [serializeChannel(channel) for channel in channels]
-
-@user.get("/channels/{channel_id}", tags=["Channels"], summary="Buscar Canal pelo ID", response_model=ChannelsDto)
-async def get_channel_by_id(channel_id: str):
-    try:
-        channel = dbc.channels.find_one({"_id": ObjectId(channel_id)})
-        if not channel:
-            raise HTTPException(status_code=404, detail="Canal não encontrado")
-        return serializeChannel(channel)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="ID inválido")
-
-@user.post("/channels/add", tags=["Channels"], summary="Adicionar Canal", response_model=Channels)
-def add_channel(channel: Channels, password: str = Depends(verify_password)):
-    result = dbc.channels.insert_one(channel.model_dump())
-    if not result.inserted_id:
-        raise HTTPException(status_code=400, detail="Erro ao adicionar canal")
-    return {"title": str(result.inserted_id)}
-
-@user.put("/movies/{movie_id}", tags=["Movies"], summary="Atualizar Filme", response_model=SuccessMessageWithTitle)
-async def update_film(movie_id: str, film: Movies, password: str = Depends(verify_password)):
-    result = db.movies.update_one(
-        {"_id": ObjectId(movie_id)},
-        {"$set": film.model_dump()}
-    )
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Filme não encontrado")
-    
-    return {'message': 'Filme atualizado com sucesso!', 'imdbid': film.imdbid}
-
-@user.delete("/movies/{movie_id}", tags=["Movies"], summary="Deletar Filme")
-async def delete_film(movie_id: str, password: str = Depends(verify_password)):
-    result = db.movies.delete_one({"_id": ObjectId(movie_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Filme não encontrado")
-    return {"message": "Filme removido com sucesso"}
 
 @user.put("/series/{series_id}", tags=["Series"], summary="Atualizar Série", response_model=Series)
 async def update_series(series_id: str, series: Series, password: str = Depends(verify_password)):
@@ -175,6 +164,7 @@ async def update_series(series_id: str, series: Series, password: str = Depends(
     updated_series = dbs.series.find_one({"_id": ObjectId(series_id)})
     return serializeSeries(updated_series)
 
+
 @user.delete("/series/{series_id}", tags=["Series"], summary="Deletar Série")
 async def delete_series(series_id: str, password: str = Depends(verify_password)):
     result = dbs.series.delete_one({"_id": ObjectId(series_id)})
@@ -182,7 +172,8 @@ async def delete_series(series_id: str, password: str = Depends(verify_password)
         raise HTTPException(status_code=404, detail="Série não encontrada")
     return {"message": "Série removida com sucesso"}
 
-@user.post("/series/{series_id}/seasons/{season_number}/episodes", tags=["Series"], summary="Adicionar um Episódio", response_model=Episode)
+
+@user.post("/series/{series_id}/seasons/{season_number}/episodes", tags=["Episodes"], summary="Adicionar um Episódio", response_model=Episode)
 async def add_episode(series_id: str, season_number: int, episode: Episode, password: str = Depends(verify_password)):
     try:
         series = dbs.series.find_one({"_id": ObjectId(series_id)})
@@ -221,7 +212,8 @@ async def add_episode(series_id: str, season_number: int, episode: Episode, pass
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@user.put("/series/{series_id}/seasons/{season_number}/episodes/{episode_number}", tags=["Series"], summary="Atualizar um Episódio", response_model=Episode)
+
+@user.put("/series/{series_id}/seasons/{season_number}/episodes/{episode_number}", tags=["Episodes"], summary="Atualizar um Episódio", response_model=Episode)
 async def update_episode(series_id: str, season_number: int, episode_number: str, episode: Episode, password: str = Depends(verify_password)):
     try:
         series = dbs.series.find_one({"_id": ObjectId(series_id)})
@@ -262,7 +254,8 @@ async def update_episode(series_id: str, season_number: int, episode_number: str
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@user.delete("/series/{series_id}/seasons/{season_number}/episodes/{episode_number}", tags=["Series"], summary="Deletar Episódio")
+
+@user.delete("/series/{series_id}/seasons/{season_number}/episodes/{episode_number}", tags=["Episodes"], summary="Deletar Episódio")
 async def delete_episode(series_id: str, season_number: int, episode_number: str, password: str = Depends(verify_password)):
     try:
         series = dbs.series.find_one({"_id": ObjectId(series_id)})
@@ -298,7 +291,47 @@ async def delete_episode(series_id: str, season_number: int, episode_number: str
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@user.put("/channels/{channel_id}", tags=["Channels"], summary="Atualizar Canal", response_model=Channels)
+
+@user.get("/channels/found", tags=["Channels"], summary="Exibir Todos os Canais", response_model=List[ChannelsDto])
+def list_channels():
+    channels = dbc.channels.find()
+    return [serializeChannel(channel) for channel in channels]
+
+
+@user.get("/channels/search/title", tags=["Channels"], summary="Buscar Canais por Título", response_model=List[ChannelsDto])
+async def search_channels_by_title(title: str = Query(..., description="Título do canal")):
+    query = {"title": {"$regex": title, "$options": "i"}}
+    channels = dbc.channels.find(query)
+    return [serializeChannel(channel) for channel in channels]
+
+
+@user.get("/channels/search/genre", tags=["Channels"], summary="Buscar Canais por Categoria", response_model=List[ChannelsDto])
+async def search_channels_by_genre(genre: str = Query(..., description="Categoria do canal")):
+    query = {"genre": {"$regex": genre, "$options": "i"}}
+    channels = dbc.channels.find(query)
+    return [serializeChannel(channel) for channel in channels]
+
+
+@user.get("/channels/{channel_id}", tags=["Channels"], summary="Buscar Canal pelo ID", response_model=ChannelsDto)
+async def get_channel_by_id(channel_id: str):
+    try:
+        channel = dbc.channels.find_one({"_id": ObjectId(channel_id)})
+        if not channel:
+            raise HTTPException(status_code=404, detail="Canal não encontrado")
+        return serializeChannel(channel)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="ID inválido")
+
+
+@user.post("/channels/add", tags=["Channels"], summary="Adicionar Canal", response_model=Channels)
+def add_channel(channel: Channels, password: str = Depends(verify_password)):
+    result = dbc.channels.insert_one(channel.model_dump())
+    if not result.inserted_id:
+        raise HTTPException(status_code=400, detail="Erro ao adicionar canal")
+    return {"title": str(result.inserted_id)}
+
+
+@user.put("/channels/{channel_id}", tags=["Channels"], summary="Atualizar Canal", response_model=SuccessMessageTitle)
 async def update_channel(channel_id: str, channel: Channels, password: str = Depends(verify_password)):
     try:
         
@@ -312,10 +345,10 @@ async def update_channel(channel_id: str, channel: Channels, password: str = Dep
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Canal não encontrado")
 
-        updated_channel = dbc.channels.find_one({"_id": ObjectId(channel_id)})
-        return serializeChannel(updated_channel)
+        return {'message': 'Canal atualizado com sucesso!', 'title': channel.title}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @user.delete("/channels/{channel_id}", tags=["Channels"], summary="Deletar Canal")
 async def delete_channel(channel_id: str, password: str = Depends(verify_password)):
@@ -323,3 +356,4 @@ async def delete_channel(channel_id: str, password: str = Depends(verify_passwor
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Canal não encontrado")
     return {"message": "Canal removido com sucesso"}
+
