@@ -18,22 +18,6 @@ def serializeFilm(item) -> dict:
         "subtitles": item["subtitles"]
     }
     
-def serializeFilmDto(item) -> dict:
-    return {
-        "imdbid": item["imdbid"],
-        "title": item["title"],
-        "overview": item["overview"],
-        "runtime": item["runtime"],
-        "releaseYear": item["releaseYear"],
-        "releaseDate": item["releaseDate"],
-        "parentalRating": item["parentalRating"],
-        "genre": item["genre"],
-        "rating": float(item["rating"]),  # Convertido para float
-        "ratingrt": float(item["ratingrt"]),  # Convertido para float
-        "poster": item["poster"],
-        "banner": item["banner"],
-    }
-
 def serializeSeries(item) -> dict:
     return {
         "imdbid": item["imdbid"],
@@ -55,6 +39,23 @@ def serializeSeries(item) -> dict:
         "poster": item["poster"],
         "banner": item["banner"]
     }
+    
+def serializeFilmDto(item) -> dict:
+    return {
+        "imdbid": item["imdbid"],
+        "title": item["title"],
+        "overview": item["overview"],
+        "runtime": item["runtime"],
+        "releaseYear": item["releaseYear"],
+        "releaseDate": item["releaseDate"],
+        "parentalRating": item["parentalRating"],
+        "genre": item["genre"],
+        "rating": float(item["rating"]),  # Convertido para float
+        "ratingrt": float(item["ratingrt"]),  # Convertido para float
+        "poster": item["poster"],
+        "banner": item["banner"],
+    }
+
     
 def serializeSeriesDto(item) -> dict:
     return {
@@ -81,6 +82,14 @@ def serializeChannel(item) -> dict:
         "link": item["link"],
         "logo": item["logo"]
     }
+    
+def serializeChannelDto(item) -> dict:
+    return {
+        "title": item["title"],
+        "category": item["category"],
+        "logo": item["logo"]
+    }
+    
 
 def serializeDict(a) -> dict:
     return {**{i: str(a[i]) for i in a if i == '_id'}, 
