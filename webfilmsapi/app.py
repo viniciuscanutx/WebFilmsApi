@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routes.route import user
-from .routes.privateroutes import read_only_router
+from .routes.private_routes import read_only_router
 
 app = FastAPI(
     title="WebFilmsAPI",
