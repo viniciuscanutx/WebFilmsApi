@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import Dict, List
+
 
 def serializeFilm(item) -> dict:
     return {
@@ -17,7 +18,8 @@ def serializeFilm(item) -> dict:
         "link": item["link"],
         "subtitles": item["subtitles"]
     }
-    
+
+
 def serializeSeries(item) -> dict:
     return {
         "imdbid": item["imdbid"],
@@ -39,7 +41,8 @@ def serializeSeries(item) -> dict:
         "poster": item["poster"],
         "banner": item["banner"]
     }
-    
+
+
 def serializeFilmDto(item) -> dict:
     return {
         "imdbid": item["imdbid"],
@@ -56,7 +59,7 @@ def serializeFilmDto(item) -> dict:
         "banner": item["banner"],
     }
 
-    
+
 def serializeSeriesDto(item) -> dict:
     return {
         "imdbid": item["imdbid"],
@@ -82,19 +85,20 @@ def serializeChannel(item) -> dict:
         "link": item["link"],
         "logo": item["logo"]
     }
-    
+
+
 def serializeChannelDto(item) -> dict:
     return {
         "title": item["title"],
         "category": item["category"],
         "logo": item["logo"]
     }
-    
+
 
 def serializeDict(a) -> dict:
-    return {**{i: str(a[i]) for i in a if i == '_id'}, 
+    return {**{i: str(a[i]) for i in a if i == '_id'},
             **{i: a[i] for i in a if i != '_id'}}
+
 
 def serializeList(entity) -> List[Dict]:
     return [serializeDict(a) for a in entity]
-

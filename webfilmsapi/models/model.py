@@ -1,5 +1,7 @@
 from typing import List, Optional, Union
+
 from pydantic import BaseModel
+
 
 class Movies(BaseModel):
     imdbid: str
@@ -31,8 +33,8 @@ class MovieDto(BaseModel):
     ratingrt: float
     poster: str
     banner: str
-    
-    
+
+
 class Episode(BaseModel):
     epnumber: str
     title: str
@@ -49,7 +51,7 @@ class Series(BaseModel):
     imdbid: str
     title: str
     overview: str
-    nseasons: Union[int, List[Season]]  
+    nseasons: Union[int, List[Season]]
     releaseYear: str
     releaseDate: str
     status: str
@@ -82,18 +84,18 @@ class Channels(BaseModel):
     category: str
     link: str
     logo: str
-    
-    
+
+
 class SuccessMessageID(BaseModel):
     message: str
     imdbid: str
-    
-    
+
+
 class SuccessMessageTitle(BaseModel):
     message: str
     title: str
-    
-    
+
+
 class ChannelsDto(BaseModel):
     title: str
     category: str
