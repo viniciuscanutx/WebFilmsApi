@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes.route import user
-from .routes.private_routes import read_only_router
+from .routes.movies.get import mg_router
+from .routes.movies.post import mp_router
+from .routes.movies.put import mput_router
+from .routes.movies.delete import md_router
 
 app = FastAPI(
     title="WebFilmsAPI",
@@ -27,6 +29,7 @@ app.add_middleware(
 )
 
 
-app.include_router(user)
-
-app.include_router(read_only_router, prefix="/private", include_in_schema=False)
+app.include_router(mg_router)
+app.include_router(mp_router)
+app.include_router(mput_router)
+app.include_router(md_router)
